@@ -3,8 +3,9 @@ package spark
 import org.apache.spark.{SparkConf, SparkContext}
 
 class SparkJob {
+  case class GenreDecade(genre: String, genreWeight: Double, decade: Int, danceability: Double, loudness: Double, tempo: Double, energy: Double)
 
-	def main (args: Array[String]): Unit = {
+  def main (args: Array[String]): Unit = {
 		
 	}
 
@@ -17,11 +18,7 @@ class SparkJob {
 		val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 		import sqlContext.implicits._
 
-		case class KeyGenre(key: String, genre: String, year: String)
-		val key = input.map(line => KeyGenre(line.split(",")(3),line.split(",")(2),line.split(",")(5))).toDF
-	
-		case class GenreDecade(genre: String, genreWeight: Double, decade: Int, danceability: Double, loudness: Double, tempo: Double, energy: Double)
-		val df = input.map{ line => 
+    val df = input.map{ line =>
 		    val lineArr = line.split(",")
 		    GenreDecade(lineArr(0),lineArr(1).toDouble,lineArr(2).toInt,lineArr(3).toDouble,lineArr(4).toDouble,lineArr(5).toDouble,lineArr(6).toDouble)                    
 		}.toDF
