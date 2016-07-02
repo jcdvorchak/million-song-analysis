@@ -1,12 +1,17 @@
 package spark
 
+import org.apache.spark.{SparkConf, SparkContext}
+
 class SparkJob {
 
-	def main (args: String[]): Unit = {
+	def main (args: Array[String]): Unit = {
 		
 	}
 
 	def weightGenreDecade() {
+		val sparkConf = new SparkConf().setAppName("MSong Analysis")
+		val sc = new SparkContext(sparkConf)
+
 		val input = sc.textFile("swift://spark-output.spark/output.txt")
 
 		val sqlContext = new org.apache.spark.sql.SQLContext(sc)
