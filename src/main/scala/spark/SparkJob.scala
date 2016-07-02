@@ -8,7 +8,7 @@ class SparkJob {
 		
 	}
 
-	def weightGenreDecade() {
+	def trackDataWeightedMean() {
 		val sparkConf = new SparkConf().setAppName("MSong Analysis")
 		val sc = new SparkContext(sparkConf)
 
