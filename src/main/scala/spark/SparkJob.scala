@@ -3,10 +3,10 @@ package spark
 class SparkJob {
 
 	def main (args: String[]): Unit = {
-		
+		//trackDataWeightedMean
 	}
 
-	def weightGenreDecade() {
+	def trackDataWeightedMean() {
 		val input = sc.textFile("swift://spark-output.spark/output.txt")
 
 		val sqlContext = new org.apache.spark.sql.SQLContext(sc)
