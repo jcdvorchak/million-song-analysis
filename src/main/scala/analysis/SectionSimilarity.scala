@@ -112,7 +112,7 @@ class SectionSimilarity(secA: Section, secB: Section,
 
 
   override def toString: String = {
-    new StringBuilder().append(secA.getStartTime)
+    new StringBuilder()
       .append(getTimeRangeStr)
       .append("\n")
       .append(getConfidenceStr)
