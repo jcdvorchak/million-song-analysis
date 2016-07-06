@@ -3,54 +3,68 @@ package analysis
 import java.util
 
 import scala.collection.JavaConversions._
-
 import msongdb.hdf5_getters
 import ncsa.hdf.`object`.h5.H5File
+import ncsa.hdf.hdf5lib.exceptions.HDF5Exception
 
 /**
   * Created by jcdvorchak on 7/3/2016.
   */
 class TrackSectionAnalysis(h5File: H5File) {
+
   object Break extends Exception {}
 
   // used for breaking out loops
+  var brokenFile = false
 
   private val artist = hdf5_getters.get_artist_name(h5File)
   private val track = hdf5_getters.get_title(h5File)
 
-  private val sectionsStart = hdf5_getters.get_sections_start(h5File)
-  private val sectionConf = hdf5_getters.get_sections_confidence(h5File)
-  private val segmentsStart = hdf5_getters.get_segments_start(h5File)
-  private val segmentsConf = hdf5_getters.get_segments_confidence(h5File)
+  private var sectionsStart, sectionConf, segmentsStart, segmentsConf: Array[Double] = new Array[Double](0)
+  private var pitches, timbres, loudnessMax, loudnessMaxTime, loudnessStart: Array[Double] = new Array[Double](0)
+  private var sectionCount, segmentCount: Int = 0
+  try {
+    sectionsStart = hdf5_getters.get_sections_start(h5File)
+    sectionConf = hdf5_getters.get_sections_confidence(h5File)
+    segmentsStart = hdf5_getters.get_segments_start(h5File)
+    segmentsConf = hdf5_getters.get_segments_confidence(h5File)
 
-  private val sectionCount = sectionsStart.length
-  private val segmentCount = segmentsStart.length
+    sectionCount = sectionsStart.length
+    segmentCount = segmentsStart.length
 
-  private val pitches = hdf5_getters.get_segments_pitches(h5File)
-  private val timbres = hdf5_getters.get_segments_timbre(h5File)
-  private val loudnessMax = hdf5_getters.get_segments_loudness_max(h5File)
-  private val loudnessMaxTime = hdf5_getters.get_segments_loudness_max_time(h5File)
-  private val loudnessStart = hdf5_getters.get_segments_loudness_start(h5File)
+    pitches = hdf5_getters.get_segments_pitches(h5File)
+    timbres = hdf5_getters.get_segments_timbre(h5File)
+    loudnessMax = hdf5_getters.get_segments_loudness_max(h5File)
+    loudnessMaxTime = hdf5_getters.get_segments_loudness_max_time(h5File)
+    loudnessStart = hdf5_getters.get_segments_loudness_start(h5File)
+  } catch {
+    case e: Exception => brokenFile = true
+  }
 
   private val sectionPitchRaw, sectionTimbreRaw, sectionLoudnessMax, sectionLoudnessMaxTime, sectionLoudnessStart = new Array[Array[Double]](sectionsStart.length)
   private val sectionPitchCount, sectionTimbreCount = new Array[Array[Int]](sectionCount)
   private var maxSimTotal = 0.0
 
   def findSimilarSections(): String = {
-    flattenTrackAudioData()
-    val simMatrix = generateSimilarities()
-//    simMatrix.foreach(x=>x.foreach(println))
-    val result = findRelativelySimilar(simMatrix, maxSimTotal)
+    var result = ""
+    if (!brokenFile) {
+      flattenTrackAudioData()
+      val simMatrix = generateSimilarities()
+      //    simMatrix.foreach(x=>x.foreach(println))
+      result = findRelativelySimilar(simMatrix, maxSimTotal)
+    } else {
+      result = "broken"
+    }
 
     result
   }
 
   def flattenTrackAudioData() {
     // array with each sections corresponding first segment
-//    val sectionPitchRaw, sectionTimbreRaw, sectionLoudnessMax, sectionLoudnessMaxTime, sectionLoudnessStart = new Array[Array[Double]](sectionsStart.length)
+    //    val sectionPitchRaw, sectionTimbreRaw, sectionLoudnessMax, sectionLoudnessMaxTime, sectionLoudnessStart = new Array[Array[Double]](sectionsStart.length)
     val sectionSegmentStartIndex = getSectionSegmentStartIndex(sectionsStart, segmentsStart)
 
-    var segStartIndex, segEndIndex: Int = -1
+    var segStartIndex, segEndIndex: Int = 0
 
     for (i <- 0 until sectionCount - 1) {
       // for each section
@@ -62,8 +76,8 @@ class TrackSectionAnalysis(h5File: H5File) {
       }
 
       val pitchCountMap, timbreCountMap = new util.TreeMap[Double, Int]()
-      val pitchRawArr, timbreRawArr = new Array[Double]((segEndIndex - segStartIndex) * 12)
-      val loudnessMaxArr, loudnessMaxTimeArr, loudnessStartArr = new Array[Double](segEndIndex - segStartIndex)
+      val pitchRawArr, timbreRawArr = new Array[Double](Math.abs(segEndIndex - segStartIndex) * 12)
+      val loudnessMaxArr, loudnessMaxTimeArr, loudnessStartArr = new Array[Double](Math.abs(segEndIndex - segStartIndex))
       var segInnerIndex, vectorIndex: Int = -1
       var count = 0
       var pitchRound, timbreRound = 0.0
@@ -155,11 +169,8 @@ class TrackSectionAnalysis(h5File: H5File) {
   def findRelativelySimilar(matrix: Array[Array[SectionSimilarity]], max: Double): String = {
     val strBuilder = new StringBuilder
     val maxDistance = 99.5 / 100.0
-
-    strBuilder.append(matrix(0)(1).getArtist)
-      .append(" - ")
-      .append(matrix(0)(1).getTrack)
-      .append("\n")
+    var firstMatch = true
+    var matchCount = 0
 
     // can skip some of these, there may be duplicates and if i=j there is no val
     var currSim: SectionSimilarity = null
@@ -167,31 +178,76 @@ class TrackSectionAnalysis(h5File: H5File) {
       for (j <- matrix.indices) {
         currSim = matrix(i)(j)
         if (currSim != null) {
-          if (currSim.getTotalSim >= max * maxDistance) {
-            if (currSim.isSimilarLength(0.9)) {
-              //} && currSim.isSectionConfident(0.5)) {
-              strBuilder
-                .append(currSim.getTimeRangeStr)
-                .append("\ttotal: ")
-                .append(matrix(i)(j).getTotalSim)
+          //          if (currSim.getTotalSim >= max * maxDistance && currSim.isSimilarLength(0.9)) {
+          if (isMatch(currSim, max)) {
+            //} && currSim.isSectionConfident(0.5)) {
+
+            if (firstMatch) {
+              strBuilder.append(matrix(0)(1).getArtist)
+                .append(" - ")
+                .append(matrix(0)(1).getTrack)
                 .append("\n")
+              firstMatch = false
             }
+
+            strBuilder
+              .append(currSim.getTimeRangeStr)
+              .append("\ttotal: ")
+              .append(currSim.getTotalSim)
+              .append("\n")
+
+//            strBuilder.append(currSim.toString).append("\n")
+
+            matchCount += 1
           }
         }
       }
     }
+
+//    strBuilder.append("match count: " + matchCount)
+
+    //    strBuilder.append("\n").append("MISSED: "+ missCount).append("\n")
+
     //if (pitchRawSim > 0.75 && timbreRawSim > 0.75 && pitchCountSim > 0.98 && timbreCountSim > 0.98) {
     //if (pitchRawSim + timbreRawSim > 1.5 && pitchCountSim + timbreCountSim > 1.96) {
     //if (loudnessMaxSim>0.95&&loudnessMaxTimeSim>0.5 && loudnessStartSim>0.97) {
     //if (loudnessMaxSim + loudnessMaxTimeSim + loudnessStartSim > 2.42) {
 
-    strBuilder.toString
+    if (strBuilder.isEmpty || matchCount >= 5) {
+      ""
+    } else {
+      strBuilder.toString
+    }
+  }
+
+  def isMatch(secSim: SectionSimilarity, maxTot: Double): Boolean = {
+    //    val maxDistance = 99.0 / 100.0
+    //    secSim.getTotalSim >= maxTot * maxDistance &&
+//        secSim.getSecA.getConfidence < .5 && secSim.getSecB.getConfidence < .5 &&
+    (secSim.getPitchRawSim + secSim.getTimbreRawSim) > 1 &&
+      secSim.getPitchCountSim > .99 &&
+      secSim.getTimbreCountSim > .99 &&
+      secSim.getLoudnessMaxSim + secSim.getLoudnessMaxTimeSim + secSim.getLoudnessStartSim > 2.42 &&
+      secSim.isSimilarLength(0.8) &&
+      (secSim.getSecA.getEndTime != secSim.getSecB.getStartTime) &&
+      (secSim.getSecA.getStartTime != secSim.getSecB.getEndTime)
+
+    //        currSim.isSectionConfident(0.5))
+    //    var newTot = secSim.getPitchRawSim
+    //    newTot += secSim.getPitchCountSim
+    //    newTot += secSim.getTimbreRawSim
+    //    newTot += secSim.getTimbreCountSim
+    //    newTot += secSim.getLoudnessMaxSim*.5
+    //    newTot += secSim.getLoudnessMaxTimeSim*.5
+    //    newTot += secSim.getLoudnessStartSim*.5
+
+
   }
 
   /*
- * Find which segment starts a section
- * First one will skip ahead with this algo, its always 0 tho a*b time complex
- */
+   * Find which segment starts a section
+   * First one will skip ahead with this algo, its always 0 tho a*b time complex
+   */
   def getSectionSegmentStartIndex(sectionsStart: Array[Double], segmentsStart: Array[Double]): Array[Int] = {
     val sectionSegmentStart = new Array[Int](sectionsStart.length)
 

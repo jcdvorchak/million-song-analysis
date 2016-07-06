@@ -23,21 +23,21 @@ object Main {
     //    analysis.attrByGenreDecade(dirList)
     //    analysis.keyTrendByGenreYear(dirList)
 
-//        val filePath = "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\data\\A\\A\\A\\TRAAAAW128F429D538.h5"
-//            val args = new Array[String](1)
-//            args(0) = filePath
-//            hdf5_getters.main(args)
+        val filePath = "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\data\\A\\A\\A\\TRAAAAW128F429D538.h5"
+            val args = new Array[String](1)
+            args(0) = filePath
+            hdf5_getters.main(args)
 
-    var trackSectionAnalysis: TrackSectionAnalysis = null
-    var h5File: H5File = null
-    dirList.foreach{ file =>
-      h5File = hdf5_getters.hdf5_open_readonly(file.getAbsolutePath)
-      trackSectionAnalysis = new TrackSectionAnalysis(h5File)
-
-      println(trackSectionAnalysis.findSimilarSections())
-
-      hdf5_getters.hdf5_close(h5File)
-    }
+//    var trackSectionAnalysis: TrackSectionAnalysis = null
+//    var h5File: H5File = null
+//    dirList.foreach{ file =>
+//      h5File = hdf5_getters.hdf5_open_readonly(file.getAbsolutePath)
+//      trackSectionAnalysis = new TrackSectionAnalysis(h5File)
+//
+//      println(trackSectionAnalysis.findSimilarSections())
+//
+//      hdf5_getters.hdf5_close(h5File)
+//    }
 
 
 
