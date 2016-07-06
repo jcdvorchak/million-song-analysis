@@ -1,0 +1,55 @@
+
+java -Djava.library.path=./lib/ -jar <jar>
+
+ssh -i ~/Documents/aws/million-song.pem hadoop@ec2-54-210-176-134.compute-1.amazonaws.com
+
+ssh -i ~/Documents/aws/million-song.pem -ND 8157 hadoop@ec2-54-210-176-134.compute-1.amazonaws.com
+
+ssh -i ~/Documents/aws/million-song.pem hadoop@ec2-54-210-176-134.compute-1.amazonaws.com
+
+scp -i ~/Documents/aws/million-song.pem ./* hadoop@ec2-54-210-176-134.compute-1.amazonaws.com:~/
+
+
+
+import msongdb.hdf5_getters
+val filePaths = sc.textFile(inputPath) //,minPartitions=5)
+
+val h5Files = filePaths.map ( line => hdf5_getters.hdf5_open_readonly(line) )
+
+val artists = h5Files.map(x => println(hdf5_getters.get_artist_name(x)))
+
+artists.saveAsTextFile(outputPath)
+
+
+
+export SPARK_PRINT_LAUNCH_COMMAND=1
+
+yarn logs -applicationId application_1467744168805_0021
+
+spark-submit --class spark.TrackSectionAnalysis --driver-class-path /home/hadoop/lib/jhdf5.dll --driver-library-path /home/hadoop/lib/jhdf5.dll --driver-java-options "-Djava.library.path=/home/hadoop/lib/jhdf5.dll" million-song-analysis-1.0-jar-with-dependencies.jar hdfsPaths.txt output
+
+
+--- SETUP ---
+scp -i ~/Documents/aws/million-song.pem ~/Documents/GitHub/million-song-analysis/lib/jhdf5.dll hadoop@ec2-54-227-103-56.compute-1.amazonaws.com:~/
+scp -i ~/Documents/aws/million-song.pem ~/Documents/GitHub/million-song-analysis/lib/jhdf5.dll hadoop@ec2-52-207-220-159.compute-1.amazonaws.com:~/
+scp -i ~/Documents/aws/million-song.pem ~/Documents/GitHub/million-song-analysis/lib/jhdf5.dll hadoop@ec2-54-204-51-240.compute-1.amazonaws.com:~/
+
+ssh -i ~/Documents/aws/million-song.pem hadoop@ec2-52-207-220-159.compute-1.amazonaws.com
+mkdir lib
+mv jhdf5.dll lib
+ssh -i ~/Documents/aws/million-song.pem hadoop@ec2-54-204-51-240.compute-1.amazonaws.com
+mkdir lib
+mv jhdf5.dll lib
+
+scp -i ~/Documents/aws/million-song.pem ~/Downloads/millionsongsubset/data/a/a/a/* hadoop@ec2-52-201-216-131.compute-1.amazonaws.com:~/
+
+ssh -i ~/Documents/aws/million-song.pem hadoop@ec2-52-201-216-131.compute-1.amazonaws.com
+hdfs dfs -mkdir subset
+hdfs dfs -put *.h5 subset
+rm *.h5
+
+touch hdfsPaths.txt
+hdfs dfs -ls subset | grep -v Found | awk -F' ' '{print $8}' > hdfsPaths.txt
+hdfs dfs -put hdfsPaths.txt
+
+scp -i ~/Documents/aws/million-song.pem ./target/million-song-analysis-1.0-jar-with-dependencies.jar hadoop@ec2-52-201-216-131.compute-1.amazonaws.com:~/

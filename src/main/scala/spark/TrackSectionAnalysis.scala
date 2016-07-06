@@ -10,7 +10,7 @@ import org.apache.spark.io.SnappyCompressionCodec
 
 /**
   * Created by jcdvorchak on 7/5/2016.
-  *
+  */
 object TrackSectionAnalysis {
 
   def main(args: Array[String]): Unit = {
