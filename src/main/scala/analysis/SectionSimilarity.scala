@@ -61,9 +61,9 @@ class SectionSimilarity(secA: Section, secB: Section,
   /*
    * Check if the confidence for secA and secB are over a certain threshold
    */
-  def isSectionConfident(threshold: Double): Boolean = {
-    secA.getConfidence > threshold && secB.getConfidence > threshold
-  }
+//  def isSectionConfident(threshold: Double): Boolean = {
+//    secA.getConfidence > threshold && secB.getConfidence > threshold
+//  }
 
   /*
  * String representation of time range between secA and secB
@@ -101,21 +101,21 @@ class SectionSimilarity(secA: Section, secB: Section,
   /*
    * String representation of secA and secB confidence
    */
-  def getConfidenceStr: String = {
-    new StringBuilder()
-      .append("confidence: ")
-      .append(secA.getConfidence)
-      .append(" and ")
-      .append(secA.getConfidence)
-      .toString
-  }
+//  def getConfidenceStr: String = {
+//    new StringBuilder()
+//      .append("confidence: ")
+//      .append(secA.getConfidence)
+//      .append(" and ")
+//      .append(secA.getConfidence)
+//      .toString
+//  }
 
 
   override def toString: String = {
     new StringBuilder()
       .append(getTimeRangeStr)
       .append("\n")
-      .append(getConfidenceStr)
+//      .append(getConfidenceStr)
       .append("\n")
       .append("pitch raw: ")
       .append(pitchRawSim)

@@ -1,11 +1,13 @@
 package analysis
 
-import java.io.File
+import java.io.{File, FileInputStream}
 import java.util
 
+import hdf5Parser.MSongHDF5Parser
 import msongdb.hdf5_getters
 import org.junit.{Before, Test}
 import ncsa.hdf.`object`.h5.H5File
+import org.apache.commons.io.IOUtils
 
 import scala.collection.JavaConversions._
 
@@ -21,8 +23,8 @@ class TrackSectionAnalysisTest {
 
   val analysis: Analysis = new Analysis
 
-    val filePath = "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\data\\A\\A\\A\\TRAAABD128F429CF47.h5"
-//  val filePath = "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\data\\A\\B\\R\\TRABRMJ128E0780E42.h5"
+  val filePath = "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\data\\A\\A\\A\\TRAAABD128F429CF47.h5"
+  //  val filePath = "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\data\\A\\B\\R\\TRABRMJ128E0780E42.h5"
   // a new hope
   val h5File: H5File = hdf5_getters.hdf5_open_readonly(filePath)
 
@@ -33,7 +35,8 @@ class TrackSectionAnalysisTest {
 
   @Test
   def findSimilarSectionsTest(): Unit = {
-    val inputPath = "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\data"
+    val inputPath = "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\data\\A\\A\\A"
+    val fileContent = IOUtils.toByteArray(this.getClass.getResourceAsStream("/TRAAAAW128F429D538.h5"))
     // gotta loop through files if there's more than one song bro
 
     val file = new Array[File](1)
@@ -42,82 +45,83 @@ class TrackSectionAnalysisTest {
     val dir = new File(inputPath)
     val dirList = Main.getRecursiveListOfFiles(dir)
     var missCount, hitCount, brokenCount, totalCount = 0.0
-    val genreHitMap,genreMissMap = new util.TreeMap[String, Int]
-    val decadeHitMap,decadeMissMap = new util.TreeMap[String, Int]
+    val genreHitMap, genreMissMap = new util.TreeMap[String, Int]
+    val decadeHitMap, decadeMissMap = new util.TreeMap[String, Int]
     var termsFreq, termsWeight: Array[Double] = null
     println("Found " + dirList.length + " files.")
     dirList.foreach { file =>
-      val h5File = hdf5_getters.hdf5_open_readonly(file.getAbsolutePath)
+      //      val h5File = hdf5_getters.hdf5_open_readonly(file.getAbsolutePath)
 
       try {
-//        if (hdf5_getters.get_artist_terms(h5File).take(5).contains("rock")) {
-          val trackAnalysis = new TrackSectionAnalysis(h5File)
-          val result = trackAnalysis.findSimilarSections()
+        //        if (hdf5_getters.get_artist_terms(h5File).take(5).contains("rock")) {
+        //        val track = MSongHDF5Parser.readHDF5File(fileContent)
+        val track = MSongHDF5Parser.readHDF5File(IOUtils.toByteArray(new FileInputStream(file)))
+        val trackAnalysis = new TrackSectionAnalysis(track)
+        val result = trackAnalysis.findSimilarSections()
 
-          termsFreq = hdf5_getters.get_artist_terms_freq(h5File)
-          termsWeight = hdf5_getters.get_artist_terms_weight(h5File)
+        termsFreq = track.getArtistTermsFreq
+        termsWeight = track.getArtistTermsWeight
 
+        if (result == "") {
+          missCount += 1
 
-          if (result == "") {
-            missCount += 1
-
-            try {
-              var termCount = 0
-              hdf5_getters.get_artist_terms(h5File).foreach { term =>
-                if (termsWeight(termCount) > 0.9 && termsFreq(termCount) > 0.9) {
-                  if (!genreMissMap.containsKey(term))
-                    genreMissMap.put(term, 1)
-                  else
-                    genreMissMap.put(term, genreMissMap.get(term) + 1)
-                }
-
-                termCount += 1
+          try {
+            var termCount = 0
+            track.getArtistTerms.foreach { term =>
+              if (termsWeight(termCount) > 0.9 && termsFreq(termCount) > 0.9) {
+                if (!genreMissMap.containsKey(term))
+                  genreMissMap.put(term, 1)
+                else
+                  genreMissMap.put(term, genreMissMap.get(term) + 1)
               }
 
-              val decade = analysis.getDecade(hdf5_getters.get_year(h5File)).toString
-              if (!decadeMissMap.containsKey(decade))
-                decadeMissMap.put(decade, 1)
-              else
-                decadeMissMap.put(decade, decadeMissMap.get(decade) + 1)
-            } catch {
-              case e: Exception =>
-            }
-          } else if (result == "broken") {
-            brokenCount += 1
-          } else {
-            println(result)
-            hitCount += 1
-
-            try {
-              var termCount = 0
-              hdf5_getters.get_artist_terms(h5File).foreach { term =>
-                if (termsWeight(termCount) > 0.9 && termsFreq(termCount) > 0.9) {
-                  if (!genreHitMap.containsKey(term))
-                    genreHitMap.put(term, 1)
-                  else
-                    genreHitMap.put(term, genreHitMap.get(term) + 1)
-                }
-
-                termCount += 1
-              }
-
-              val decade = analysis.getDecade(hdf5_getters.get_year(h5File)).toString
-              if (!decadeHitMap.containsKey(decade))
-                decadeHitMap.put(decade, 1)
-              else
-                decadeHitMap.put(decade, decadeHitMap.get(decade) + 1)
-            } catch {
-              case e: Exception =>
+              termCount += 1
             }
 
+            val decade = analysis.getDecade(track.getYear.toInt).toString
+            if (!decadeMissMap.containsKey(decade))
+              decadeMissMap.put(decade, 1)
+            else
+              decadeMissMap.put(decade, decadeMissMap.get(decade) + 1)
+          } catch {
+            case e: Exception =>
           }
-          totalCount += 1
-//        }
+        } else if (result == "broken") {
+          brokenCount += 1
+        } else {
+          println(result)
+          hitCount += 1
+
+          try {
+            var termCount = 0
+            track.getArtistTerms.foreach { term =>
+              if (termsWeight(termCount) > 0.9 && termsFreq(termCount) > 0.9) {
+                if (!genreHitMap.containsKey(term))
+                  genreHitMap.put(term, 1)
+                else
+                  genreHitMap.put(term, genreHitMap.get(term) + 1)
+              }
+
+              termCount += 1
+            }
+
+            val decade = analysis.getDecade(track.getYear.toInt).toString
+            if (!decadeHitMap.containsKey(decade))
+              decadeHitMap.put(decade, 1)
+            else
+              decadeHitMap.put(decade, decadeHitMap.get(decade) + 1)
+          } catch {
+            case e: Exception =>
+          }
+
+        }
+        totalCount += 1
+        //        }
       } catch {
         case e: Exception =>
       }
 
-      hdf5_getters.hdf5_close(h5File)
+
     }
     println("tracks broken: " + brokenCount)
     println("tracks missed: " + missCount)

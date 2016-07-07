@@ -5,11 +5,15 @@ import java.util
 import hdf5Parser.Track
 
 import scala.collection.JavaConversions._
+import msongdb.hdf5_getters
+import ncsa.hdf.`object`.h5.H5File
+import ncsa.hdf.hdf5lib.exceptions.HDF5Exception
 
 /**
   * Created by jcdvorchak on 7/3/2016.
   */
-class TrackSectionAnalysis(track: Track) {
+class TrackSectionAnalysisLocal(track: Track) {
+
   // used for breaking out loops
   object Break extends Exception {}
 
@@ -57,17 +61,24 @@ class TrackSectionAnalysis(track: Track) {
     maxSimTotal = 0.0
   }
 
-  def findSimilarSections(): List[SectionSimilarity] = {
+  def findSimilarSections(): String = {
 
-    var result: List[SectionSimilarity] = null
+    var result = ""
     if (!brokenFile && track.isValid) {
       flattenTrackAudioData()
       val simMatrix = generateSimilarities()
+      //      simMatrix.foreach(x => x.foreach(println))
       result = findRelativelySimilar(simMatrix, maxSimTotal)
+    } else {
+      result = "broken"
     }
 
     result
   }
+
+  //  def findSimilarSectionsLocal(): String = {
+  //
+  //  }
 
   def flattenTrackAudioData() {
     sectionCount = track.getSectionStart.length
@@ -180,13 +191,11 @@ class TrackSectionAnalysis(track: Track) {
     secSimMatrix
   }
 
-  def findRelativelySimilar(matrix: Array[Array[SectionSimilarity]], max: Double): List[SectionSimilarity] = {
+  def findRelativelySimilar(matrix: Array[Array[SectionSimilarity]], max: Double): String = {
     val strBuilder = new StringBuilder
     val maxDistance = 99.5 / 100.0
     var firstMatch = true
     var matchCount = 0
-
-    val sectionSimilarityList = List[SectionSimilarity]()
 
     // can skip some of these, there may be duplicates and if i=j there is no val
     var currSim: SectionSimilarity = null
@@ -198,7 +207,22 @@ class TrackSectionAnalysis(track: Track) {
           if (isMatch(currSim, max)) {
             //} && currSim.isSectionConfident(0.5)) {
 
-            sectionSimilarityList.add(currSim)
+
+            if (firstMatch) {
+              strBuilder.append(matrix(0)(1).getArtist)
+                .append(" - ")
+                .append(matrix(0)(1).getTrack)
+                .append("\n")
+              firstMatch = false
+            }
+
+            strBuilder
+              .append(currSim.getTimeRangeStr)
+              .append("\ttotal: ")
+              .append(currSim.getTotalSim)
+              .append("\n")
+
+            //            strBuilder.append(currSim.toString).append("\n")
 
             matchCount += 1
           }
@@ -206,17 +230,20 @@ class TrackSectionAnalysis(track: Track) {
       }
     }
 
+    //    strBuilder.append("match count: " + matchCount)
+
+    //    strBuilder.append("\n").append("MISSED: "+ missCount).append("\n")
+
     //if (pitchRawSim > 0.75 && timbreRawSim > 0.75 && pitchCountSim > 0.98 && timbreCountSim > 0.98) {
     //if (pitchRawSim + timbreRawSim > 1.5 && pitchCountSim + timbreCountSim > 1.96) {
     //if (loudnessMaxSim>0.95&&loudnessMaxTimeSim>0.5 && loudnessStartSim>0.97) {
     //if (loudnessMaxSim + loudnessMaxTimeSim + loudnessStartSim > 2.42) {
 
-//    if (strBuilder.isEmpty || matchCount >= 5) {
-//      ""
-//    } else {
-//      strBuilder.toString
-//    }
-    return sectionSimilarityList
+    if (strBuilder.isEmpty || matchCount >= 5) {
+      ""
+    } else {
+      strBuilder.toString
+    }
   }
 
   def isMatch(secSim: SectionSimilarity, maxTot: Double): Boolean = {

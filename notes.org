@@ -53,3 +53,11 @@ hdfs dfs -ls subset | grep -v Found | awk -F' ' '{print $8}' > hdfsPaths.txt
 hdfs dfs -put hdfsPaths.txt
 
 scp -i ~/Documents/aws/million-song.pem ./target/million-song-analysis-1.0-jar-with-dependencies.jar hadoop@ec2-52-201-216-131.compute-1.amazonaws.com:~/
+
+
+
+spark-submit --master yarn --driver-class-path /usr/lib/hadoop-lzo/lib/*:/usr/lib/hadoop/hadoop-aws.jar:/usr/share/aws/aws-java-sdk/*:/usr/share/aws/emr/emrfs/conf/:/usr/share/aws/emr/emrfs/lib/*:/usr/share/aws/emr/emrfs/auxlib/* million-song-analysis-1.0-jar-with-dependencies.jar "full-subset/data/*/*/*/*.h5" output/
+
+hdfs dfsadmin -report
+
+nohup hdfs dfs -put /data/data &> /home/hadoop/put.log &

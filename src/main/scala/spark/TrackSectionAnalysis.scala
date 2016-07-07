@@ -1,12 +1,10 @@
 package spark
 
+import analysis.{TrackSectionAnalysis, TrackSectionAnalysisLocal}
+import hdf5Parser.MSongHDF5Parser
 import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.JavaConversions._
-import msongdb.hdf5_getters
-import ncsa.hdf.`object`.h5.H5File
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat
-import org.apache.spark.io.SnappyCompressionCodec
 
 /**
   * Created by jcdvorchak on 7/5/2016.
@@ -21,30 +19,31 @@ object TrackSectionAnalysis {
     val inputPath = args(0)
     val outputPath = args(1)
 
-//    System.setProperty("java.library.path","/home/hadoop/lib")
-
     val sparkConf = new SparkConf().setAppName("Track Section Analysis")
-    sparkConf.set("spark.hadoop.fs.s3n.impl","org.apache.hadoop.fs.s3native.NativeS3FileSystem")
-    sparkConf.set("spark.hadoop.fs.s3.impl","org.apache.hadoop.fs.s3.S3FileSystem");
     val sc = new SparkContext(sparkConf)
 
-    //    val binaryInput = sc.binaryFiles(inputPath)
+    val inputData = sc.binaryFiles(inputPath)
 
-    //    val h5Files = binaryInput.map { pair =>
-    //      val name = pair._1
-    //      val data = pair._2.toArray()
-    //
-    //    }
+    val tracks = inputData.map{pair =>
+      MSongHDF5Parser.readHDF5File(pair._1,pair._2.toArray())
+    }
 
-    val filePaths = sc.textFile(inputPath) //,minPartitions=5)
-//    filePaths.saveAsTextFile(outputPath)
+//    val artists = tracks.map(track => track.getArtistName)
+//    artists.saveAsTextFile(outputPath)
 
-    val h5Files = filePaths.map ( line => hdf5_getters.hdf5_open_readonly(line) )
+    val similarities = tracks.map(track => new TrackSectionAnalysisLocal(track).findSimilarSections())
+    similarities.saveAsTextFile(outputPath)
 
-    val artists = h5Files.map(x => (hdf5_getters.get_artist_name(x),""))
-//    val artists = h5Files.map(x => x.getName)
+    // make tracksectionanalysis static broh
+    // make section hold more (have a thin section and a thick section) -- basically not the huge arrays
+    // make a thin track object too for later -- basically not the huge arrays
+    // FLATMAP A TRACK TO KEYVAL(ARTIST/TRACK),SECTION
+      // need a func to go from track to sectinos
+    // REDUCE BY KEY WHERE A,B ARE SECTIONS OF A TRACK, KEYVAL WOULD BE ARTIST TRACK
+      // need a func to compare two sections
+      // can skip func if they are way dif lengths, or next to each other, w/e
 
-    artists.saveAsTextFile(outputPath)
+    // SHOULD END UP WITH AN OBJ LIKE KEY--ARTIST/TRACK--VAL LIST OF TRACK SecSim objects
 
 //    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
 //    import sqlContext.implicits._

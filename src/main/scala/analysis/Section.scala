@@ -5,7 +5,7 @@ package analysis
   *
   * Created by jcdvorchak on 7/3/2016.
   */
-class Section(artist: String, track: String, startTime: Double, endTime: Double, confidence: Double) {
+class Section(artist: String, track: String, startTime: Double, endTime: Double) {
   val length = endTime - startTime
 
   def getArtist: String = artist
@@ -16,7 +16,7 @@ class Section(artist: String, track: String, startTime: Double, endTime: Double,
 
   def getEndTime: Double = endTime
 
-  def getConfidence: Double = confidence
+//  def getConfidence: Double = confidence
 
   def getLength: Double = length
 }
