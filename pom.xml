@@ -10,7 +10,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <main.class>spark.TrackSectionAnalysis</main.class>
+        <!--<main.class>spark.TrackSectionAnalysis</main.class>-->
+        <main.class>msong.LocalRuns</main.class>
     </properties>
 
     <repositories>
@@ -42,7 +43,7 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.10</artifactId>
             <version>1.6.1</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-sql_2.10 -->
@@ -50,7 +51,7 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.10</artifactId>
             <version>1.6.1</version>
-            <scope>provided</scope>
+            <!--<scope>provided</scope>-->
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.hdfgroup/hdf-java -->
@@ -65,7 +66,6 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>2.10.6</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>

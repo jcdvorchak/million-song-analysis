@@ -12,6 +12,8 @@ class SectionSimilarity(secA: Section, secB: Section,
                         pitchCountSim: Double, timbreCountSim: Double,
                         loudnessMaxSim: Double, loudnessMaxTimeSim: Double, loudnessStartSim: Double) extends Serializable {
 
+  object Break extends Exception {}
+
   private val totalSim: Double = pitchRawSim + timbreRawSim + pitchCountSim + timbreCountSim + loudnessMaxSim + loudnessMaxTimeSim + loudnessStartSim
 
   /*
@@ -100,6 +102,59 @@ class SectionSimilarity(secA: Section, secB: Section,
       .append("loudness start: ")
       .append(loudnessStartSim)
       .toString
+  }
+
+  def toCsv: String = {
+    new StringBuilder()
+      .append(this.getTrack.getArtistName).append(",")
+      .append(this.getTrack.getTrackName).append(",")
+      .append(this.getTrack.getYear).append(",")
+      .append(this.getTrack.getArtistLocation).append(",")
+      .append(this.getTrack.getSongHotttnesss).append(",")
+      .append(top3Genre())
+      .append(readableSeconds(this.getSecA.getStartTime))
+      .append("-")
+      .append(readableSeconds(this.getSecA.getEndTime)).append(",")
+      .append(this.getSecA.getLength).append(",")
+      .append(readableSeconds(secB.getStartTime))
+      .append("-")
+      .append(readableSeconds(secB.getEndTime)).append(",")
+      .append(this.getSecA.getLength).append(",")
+      .append(pitchRawSim).append(",")
+      .append(timbreRawSim).append(",")
+      .append(pitchCountSim).append(",")
+      .append(timbreCountSim).append(",")
+      .append(loudnessMaxSim).append(",")
+      .append(loudnessMaxTimeSim).append(",")
+      .append(loudnessStartSim)
+      .toString
+  }
+
+  def top3Genre(): String = {
+    var result = new StringBuilder
+    var termCount = 0
+    val termArr = new Array[String](3)
+    termArr(0)=""
+    termArr(1)=""
+    termArr(2)=""
+
+    try {
+      this.getTrack.getArtistTerms.foreach { term =>
+        if (this.getTrack.getArtistTermsWeight()(termCount) > 0.9 && this.getTrack.getArtistTermsFreq()(termCount) > 0.9) {
+          termArr(termCount)=term
+          termCount += 1
+        }
+        if (termCount>=3) {
+          throw Break
+        }
+      }
+    } catch {
+      case Break =>
+    }
+
+    termArr.foreach(term => result.append(term).append(","))
+
+    result.toString
   }
 
 }

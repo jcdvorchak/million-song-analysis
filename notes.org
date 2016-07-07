@@ -72,3 +72,16 @@ ps -eaf | grep "put /data/data"
 ps -eaf | grep "FsShell"
 
 ./bin/hadoop dfs -setrep -R -w 1 /
+
+
+
+artistName,trackName, year,artistLocation,songHotttnesss,genre1,genre2,genre3,sectionATime,sectionALength,sectionBTime,sectionBLength,pitchSim,timbreSim,pitchCountSim,timbreCountSim,loudnessMaxSim,loudnessMaxTimeSim,loudnessStartSim
+JennyAnyKind,Young Boy Blues,0,North Carolina,0.0,alternative rock,,,8s-38s,30.29088,1m36s-2m11s,30.29088,0.5620958103008395,0.8847074011244374,0.9989361736523376,0.9973172479333414,0.9582870091645406,0.6532403845552844,0.9777919308691081
+
+
+  java -jar ./target/million-song-analysis-1.0-jar-with-dependencies.jar "~/Downloads/millionsongsubset/data/A/A/A" "~/Downloads/millionsongsubset/output.txt"
+
+megaman!
+ssh -i ~/Documents/aws/million-song.pem ec2-user@ec2-54-209-99-3.compute-1.amazonaws.com
+
+nohup java -cp /home/ec2-user/million-song-analysis-1.0-jar-with-dependencies.jar msong.LocalRuns /data/data/A/A/A /home/ec2-user/output.csv &> /home/ec2-user/msong.log &

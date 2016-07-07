@@ -1,7 +1,7 @@
 package spark
 
 import msong.hdf5Parser.MSongHDF5Parser
-import msong.{TrackSectionAnalysis, TrackSectionAnalysisLocal}
+import msong.TrackSectionAnalysis
 import msong.section.{SectionSimilarity, FullSection, Section}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
@@ -31,11 +31,6 @@ object TrackSectionAnalysis {
       MSongHDF5Parser.readHDF5File(pair._1, pair._2.toArray())
     }
 
-    //    val artists = tracks.map(track => track.getArtistName)
-    //    artists.saveAsTextFile(outputPath)
-    //    val similarities = tracks.map(track => new TrackSectionAnalysisLocal(track).findSimilarSections())
-    //    similarities.saveAsTextFile(outputPath)
-
     val sections: RDD[Tuple2[Tuple2[String, String], FullSection]] = tracks.flatMap { track =>
       val sectionArr = new ListBuffer[Tuple2[Tuple2[String, String], FullSection]]
 
@@ -51,15 +46,14 @@ object TrackSectionAnalysis {
     val similarities = sections.groupByKey().flatMap { pair =>
       val key = pair._1
       val sectionArr = pair._2.toArray
-      val secSimList = new ListBuffer[SectionSimilarity]()
+      val secSimList = new ListBuffer[String]()
       var secSim: SectionSimilarity = null
-//      pair._2.foreach{i =>
-//        pair._2.foreach { j =>
+
       for (i <- 0 until pair._2.iterator.length) {
         for (j <- i until pair._2.iterator.length) {
           secSim = msong.TrackSectionAnalysis.sectionsToSimilarity(sectionArr(i),sectionArr(j))
           if (secSim!=null) {
-            secSimList.add(secSim)
+            secSimList.add(secSim.toCsv)
           }
         }
       }
@@ -67,9 +61,7 @@ object TrackSectionAnalysis {
       secSimList
     }
 
-    //secSimList needs to be formatted bro
-
-    val matches = similarities.filter(sim => sim != null)
+    val matches = similarities.filter(line => line != null)
 
     matches.saveAsTextFile(outputPath)
 
