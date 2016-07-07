@@ -1,5 +1,6 @@
 package analysis
 
+import msong.Analysis
 import org.junit.Test
 
 

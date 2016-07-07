@@ -1,4 +1,6 @@
-package analysis
+package msong.section
+
+import msong.track.Track
 
 /**
   * Similarities between two sections of a song
@@ -8,11 +10,9 @@ package analysis
 class SectionSimilarity(secA: Section, secB: Section,
                         pitchRawSim: Double, timbreRawSim: Double,
                         pitchCountSim: Double, timbreCountSim: Double,
-                        loudnessMaxSim: Double, loudnessMaxTimeSim: Double, loudnessStartSim: Double) {
+                        loudnessMaxSim: Double, loudnessMaxTimeSim: Double, loudnessStartSim: Double) extends Serializable {
 
   private val totalSim: Double = pitchRawSim + timbreRawSim + pitchCountSim + timbreCountSim + loudnessMaxSim + loudnessMaxTimeSim + loudnessStartSim
-  private val artist = secA.getArtist
-  private val track = secA.getTrack
 
   /*
    * Getters, Beautiful Scala Getters
@@ -37,33 +37,7 @@ class SectionSimilarity(secA: Section, secB: Section,
 
   def getTotalSim: Double = totalSim
 
-  def getArtist: String = artist
-
-  def getTrack: String = track
-
-  /*
-   * Check if the length of secA and secB are within a certain threshold of each other
-   */
-  def isSimilarLength(threshold: Double): Boolean = {
-    var long = 0.0
-    var short = 0.0
-    if (secA.getLength > secB.getLength) {
-      long = secA.getLength
-      short = secB.getLength
-    } else {
-      short = secA.getLength
-      long = secB.getLength
-    }
-
-    short >= long * threshold
-  }
-
-  /*
-   * Check if the confidence for secA and secB are over a certain threshold
-   */
-//  def isSectionConfident(threshold: Double): Boolean = {
-//    secA.getConfidence > threshold && secB.getConfidence > threshold
-//  }
+  def getTrack: Track = secA.getTrack
 
   /*
  * String representation of time range between secA and secB
@@ -98,24 +72,12 @@ class SectionSimilarity(secA: Section, secB: Section,
     }
   }
 
-  /*
-   * String representation of secA and secB confidence
-   */
-//  def getConfidenceStr: String = {
-//    new StringBuilder()
-//      .append("confidence: ")
-//      .append(secA.getConfidence)
-//      .append(" and ")
-//      .append(secA.getConfidence)
-//      .toString
-//  }
-
 
   override def toString: String = {
     new StringBuilder()
-      .append(getTimeRangeStr)
+      .append(secA.getPrettyName)
       .append("\n")
-//      .append(getConfidenceStr)
+      .append(getTimeRangeStr)
       .append("\n")
       .append("pitch raw: ")
       .append(pitchRawSim)

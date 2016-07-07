@@ -1,11 +1,11 @@
-package analysis
+package msong
 
-import msongdb.hdf5_getters
 import java.io.{File, PrintWriter}
-
-import scala.collection.JavaConversions._
 import java.util
 
+import scala.collection.JavaConversions._
+
+import msongdb.hdf5_getters
 import ncsa.hdf.`object`.h5.H5File
 import ncsa.hdf.hdf5lib.exceptions.HDF5Exception
 

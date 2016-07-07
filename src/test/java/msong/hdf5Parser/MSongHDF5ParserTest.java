@@ -1,5 +1,6 @@
-package hdf5Parser;
+package msong.hdf5Parser;
 
+import msong.track.FullTrack;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,9 +19,9 @@ public class MSongHDF5ParserTest {
 
     @Test
     public void readHDF5FileTest() throws Exception {
-        Track track = MSongHDF5Parser.readHDF5File(fileContent);
+        FullTrack fullTrack = MSongHDF5Parser.readHDF5File(fileContent);
 
-        System.out.println(track.getPrettyName());
+        System.out.println(fullTrack.getPrettyName());
     }
 
 }

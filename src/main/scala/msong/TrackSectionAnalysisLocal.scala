@@ -1,18 +1,16 @@
-package analysis
+package msong
 
 import java.util
 
-import hdf5Parser.Track
-
 import scala.collection.JavaConversions._
-import msongdb.hdf5_getters
-import ncsa.hdf.`object`.h5.H5File
-import ncsa.hdf.hdf5lib.exceptions.HDF5Exception
+
+import msong.section.{SectionSimilarity, Section}
+import msong.track.{FullTrack, Track}
 
 /**
   * Created by jcdvorchak on 7/3/2016.
   */
-class TrackSectionAnalysisLocal(track: Track) {
+class TrackSectionAnalysisLocal(track: FullTrack) {
 
   // used for breaking out loops
   object Break extends Exception {}
@@ -182,8 +180,8 @@ class TrackSectionAnalysisLocal(track: Track) {
           maxSimTotal = currSimTotal
         }
 
-        currSectionA = new Section(artist, trackName, sectionsStart(i), sectionsStart(i + 1)) //, sectionConf(i))
-        currSectionB = new Section(artist, trackName, sectionsStart(j), sectionsStart(j + 1)) //, sectionConf(j))
+//        currSectionA = new Section(artist, trackName, sectionsStart(i), sectionsStart(i + 1)) //, sectionConf(i))
+//        currSectionB = new Section(artist, trackName, sectionsStart(j), sectionsStart(j + 1)) //, sectionConf(j))
         secSimMatrix(i)(j) = new SectionSimilarity(currSectionA, currSectionB, pitchRawSim, timbreRawSim, pitchCountSim, timbreCountSim, loudnessMaxSim, loudnessMaxTimeSim, loudnessStartSim)
       }
     }
@@ -208,13 +206,13 @@ class TrackSectionAnalysisLocal(track: Track) {
             //} && currSim.isSectionConfident(0.5)) {
 
 
-            if (firstMatch) {
-              strBuilder.append(matrix(0)(1).getArtist)
-                .append(" - ")
-                .append(matrix(0)(1).getTrack)
-                .append("\n")
-              firstMatch = false
-            }
+//            if (firstMatch) {
+//              strBuilder.append(matrix(0)(1).getArtist)
+//                .append(" - ")
+//                .append(matrix(0)(1).getTrack)
+//                .append("\n")
+//              firstMatch = false
+//            }
 
             strBuilder
               .append(currSim.getTimeRangeStr)
@@ -254,7 +252,7 @@ class TrackSectionAnalysisLocal(track: Track) {
       secSim.getPitchCountSim > .99 &&
       secSim.getTimbreCountSim > .99 &&
       secSim.getLoudnessMaxSim + secSim.getLoudnessMaxTimeSim + secSim.getLoudnessStartSim > 2.42 &&
-      secSim.isSimilarLength(0.8) &&
+//      secSim.isSimilarLength(0.8) &&
       (secSim.getSecA.getEndTime != secSim.getSecB.getStartTime) &&
       (secSim.getSecA.getStartTime != secSim.getSecB.getEndTime)
 

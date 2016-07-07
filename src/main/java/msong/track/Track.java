@@ -1,19 +1,40 @@
-package hdf5Parser;
+package msong.track;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Created by jcdvorchak on 7/6/2016.
+ * Created by dvorcjc on 7/7/2016.
  */
-public class Track {
+public class Track implements Serializable {
     private String trackName, artistName, year, artistLocation;
     private String[] artistTerms;
     private double[] artistTermsFreq, artistTermsWeight;
 
     private double danceability, energy, keyConfidence, loudness, songHotttnesss, tempo, duration;
     private int key;
-    private double[] sectionStart, segmentsStart, segmentsLoudnessMax, segmentsLoudnessMaxTime, segmentsLoudnessStart;
-    private double[][] segmentsPitches, segmentsTimbre;
+
+    public Track() {
+
+    }
+
+    public Track(String trackName, String artistName, String year, String artistLocation, String[] artistTerms, double[] artistTermsFreq, double[] artistTermsWeight, double danceability, double energy, double keyConfidence, double loudness, double songHotttnesss, double tempo, double duration, int key) {
+        this.trackName = trackName;
+        this.artistName = artistName;
+        this.year = year;
+        this.artistLocation = artistLocation;
+        this.artistTerms = artistTerms;
+        this.artistTermsFreq = artistTermsFreq;
+        this.artistTermsWeight = artistTermsWeight;
+        this.danceability = danceability;
+        this.energy = energy;
+        this.keyConfidence = keyConfidence;
+        this.loudness = loudness;
+        this.songHotttnesss = songHotttnesss;
+        this.tempo = tempo;
+        this.duration = duration;
+        this.key = key;
+    }
 
     public boolean isValid() {
         if (this.trackName == null ||
@@ -22,7 +43,7 @@ public class Track {
                 this.artistLocation == null ||
                 this.artistTerms == null ||
                 this.artistTermsFreq == null ||
-                this.artistTermsWeight == null ||
+                this.artistTermsWeight == null
 //                this.danceability == null ||
 //                this.energy == null ||
 //                this.keyConfidence == null ||
@@ -31,18 +52,13 @@ public class Track {
 //                this.tempo == null ||
 //                this.duration == null ||
 //                this.key >= 0 ||
-                this.sectionStart == null ||
-                this.segmentsStart == null ||
-                this.segmentsLoudnessMax == null ||
-                this.segmentsLoudnessMaxTime == null ||
-                this.segmentsLoudnessStart == null ||
-                this.segmentsPitches == null ||
-                this.segmentsTimbre == null) {
+                ) {
             return false;
-    } else {
+        } else {
             return true;
         }
     }
+
 
     public String getTrackName() {
         return trackName;
@@ -66,6 +82,14 @@ public class Track {
 
     public void setYear(String year) {
         this.year = year;
+    }
+
+    public String getArtistLocation() {
+        return artistLocation;
+    }
+
+    public void setArtistLocation(String artistLocation) {
+        this.artistLocation = artistLocation;
     }
 
     public String[] getArtistTerms() {
@@ -156,75 +180,13 @@ public class Track {
         this.duration = duration;
     }
 
-    public double[] getSectionStart() {
-        return sectionStart;
-    }
-
-    public void setSectionStart(double[] sectionStart) {
-        this.sectionStart = sectionStart;
-    }
-
-    public double[] getSegmentsStart() {
-        return segmentsStart;
-    }
-
-    public void setSegmentsStart(double[] segmentsStart) {
-        this.segmentsStart = segmentsStart;
-    }
-
-    public double[] getSegmentsLoudnessMax() {
-        return segmentsLoudnessMax;
-    }
-
-    public void setSegmentsLoudnessMax(double[] segmentsLoudnessMax) {
-        this.segmentsLoudnessMax = segmentsLoudnessMax;
-    }
-
-    public double[] getSegmentsLoudnessMaxTime() {
-        return segmentsLoudnessMaxTime;
-    }
-
-    public void setSegmentsLoudnessMaxTime(double[] segmentsLoudnessMaxTime) {
-        this.segmentsLoudnessMaxTime = segmentsLoudnessMaxTime;
-    }
-
-    public double[] getSegmentsLoudnessStart() {
-        return segmentsLoudnessStart;
-    }
-
-    public void setSegmentsLoudnessStart(double[] segmentsLoudnessStart) {
-        this.segmentsLoudnessStart = segmentsLoudnessStart;
-    }
-
-    public double[][] getSegmentsPitches() {
-        return segmentsPitches;
-    }
-
-    public void setSegmentsPitches(double[][] segmentsPitches) {
-        this.segmentsPitches = segmentsPitches;
-    }
-
-    public double[][] getSegmentsTimbre() {
-        return segmentsTimbre;
-    }
-
-    public void setSegmentsTimbre(double[][] segmentsTimbre) {
-        this.segmentsTimbre = segmentsTimbre;
-    }
-
-    public String getArtistLocation() {
-        return artistLocation;
-    }
-
-    public void setArtistLocation(String artistLocation) {
-        this.artistLocation = artistLocation;
-    }
 
     @Override
     public String toString() {
         return ("getTrackName : " + this.getTrackName()) + "\n" +
                 "getArtistName : " + this.getArtistName() + "\n" +
                 "getYear : " + this.getYear() + "\n" +
+                "getArtistLocation : " + this.getArtistLocation() + "\n" +
                 "getArtistTerms : " + Arrays.toString(this.getArtistTerms()) + "\n" +
                 "getArtistTermsFreq : " + Arrays.toString(this.getArtistTermsFreq()) + "\n" +
                 "getArtistTermsWeight : " + Arrays.toString(this.getArtistTermsWeight()) + "\n" +
@@ -235,18 +197,11 @@ public class Track {
                 "getLoudness : " + this.getLoudness() + "\n" +
                 "getSongHotttnesss : " + this.getSongHotttnesss() + "\n" +
                 "getTempo : " + this.getTempo() + "\n" +
-                "getDuration : " + this.getDuration() + "\n" +
-                "getSectionStart : " + Arrays.toString(this.getSectionStart()) + "\n" +
-                "getSegmentsStart : " + Arrays.toString(this.getSegmentsStart()) + "\n" +
-                "getSegmentsLoudnessMax : " + Arrays.toString(this.getSegmentsLoudnessMax()) + "\n" +
-                "getSegmentsLoudnessMaxTime : " + Arrays.toString(this.getSegmentsLoudnessMaxTime()) + "\n" +
-                "getSegmentsLoudnessStart : " + Arrays.toString(this.getSegmentsLoudnessStart()) + "\n" +
-                "getSegmentsPitches : " + Arrays.deepToString(this.getSegmentsPitches()) + "\n" +
-                "getSegmentsTimbre : " + Arrays.deepToString(this.getSegmentsTimbre()) + "\n" +
-                "getArtistLocation : " + this.getArtistLocation();
+                "getDuration : " + this.getDuration();
     }
 
     public String getPrettyName() {
         return this.artistName + " - " + this.trackName + " (" + this.getYear() + ")";
     }
+
 }
