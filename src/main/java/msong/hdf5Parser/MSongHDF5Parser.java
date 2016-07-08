@@ -56,9 +56,9 @@ public class MSongHDF5Parser {
         } catch (Exception e) {
             LOGGER.error("Error reading /metadata/songs: " + e.getMessage());
         }
-        fullTrack.setTrackName(metadataSongs.getScalarString("title"));
-        fullTrack.setArtistName(metadataSongs.getScalarString("artist_name"));
-        fullTrack.setArtistLocation(metadataSongs.getScalarString("artist_location"));
+        fullTrack.setTrackName(metadataSongs.getScalarString("title").replace("\\|",""));
+        fullTrack.setArtistName(metadataSongs.getScalarString("artist_name").replace("\\|",""));
+        fullTrack.setArtistLocation(metadataSongs.getScalarString("artist_location").replace("\\|",""));
         fullTrack.setSongHotttnesss(metadataSongs.getScalarDouble("artist_hotttnesss"));
 
         try {
