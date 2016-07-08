@@ -14,7 +14,7 @@ public class MSongHDF5ParserTest {
 
     @Before
     public void setup() throws Exception {
-        fileContent = IOUtils.toByteArray(this.getClass().getResourceAsStream("/TRAAAAW128F429D538.h5"));
+        fileContent = IOUtils.toByteArray(this.getClass().getResourceAsStream("/TRBCCYW12903CEC282.h5"));//TRAAAAW128F429D538.h5"));
     }
 
     @Test
