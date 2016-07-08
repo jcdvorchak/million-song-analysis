@@ -1,15 +1,11 @@
-package analysis
+package msong
 
 import java.io.{File, FileInputStream}
-import java.util
 
 import msong.hdf5Parser.MSongHDF5Parser
 import msong.section.SectionSimilarity
-import msong.{TrackSectionAnalysis, Analysis}
-import msongdb.hdf5_getters
-import org.junit.{Before, Test}
-import ncsa.hdf.`object`.h5.H5File
 import org.apache.commons.io.IOUtils
+import org.junit.{Before, Test}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer

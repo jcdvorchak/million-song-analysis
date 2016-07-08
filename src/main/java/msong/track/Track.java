@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
+ * Container for Track metadata and some other stats
+ *
  * Created by dvorcjc on 7/7/2016.
  */
 public class Track implements Serializable {
@@ -180,7 +182,6 @@ public class Track implements Serializable {
         this.duration = duration;
     }
 
-
     @Override
     public String toString() {
         return ("getTrackName : " + this.getTrackName()) + "\n" +
@@ -204,4 +205,58 @@ public class Track implements Serializable {
         return this.artistName + " - " + this.trackName + " (" + this.getYear() + ")";
     }
 
+    /**
+     * Array of size 3 containing the first 3 artist terms above .9 freq and weight
+     *
+     * @return
+     */
+    public String[] getTop3Genre() {
+
+        int termCount = 0;
+        String[] termArr = new String[3];
+        termArr[0]="";
+        termArr[1]="";
+        termArr[2]="";
+
+        for (String term : this.getArtistTerms()) {
+            if (this.getArtistTermsWeight()[termCount] > 0.9 && this.getArtistTermsFreq()[termCount] > 0.9) {
+                termArr[termCount]=term;
+                termCount += 1;
+            }
+            if (termCount>=3) {
+                break;
+            }
+        }
+
+        return termArr;
+    }
+
+    /**
+     * String of format 'term1,term2,term3,' containing the first 3 artist terms above .9 freq and weight
+     *
+     * @return
+     */
+    public String getTop3GenreCsv() {
+        String[] termArr = this.getTop3Genre();
+
+        StringBuilder strBuilder = new StringBuilder();
+
+        for (String term : termArr) {
+            strBuilder.append(term).append(",");
+        }
+
+        return strBuilder.toString();
+    }
+
+    public String getTop3GenrePsv() {
+        String[] termArr = this.getTop3Genre();
+
+        StringBuilder strBuilder = new StringBuilder();
+
+        for (String term : termArr) {
+            strBuilder.append(term).append("|");
+        }
+
+        return strBuilder.toString();
+    }
 }

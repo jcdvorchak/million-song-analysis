@@ -1,8 +1,7 @@
 package spark
 
 import msong.hdf5Parser.MSongHDF5Parser
-import msong.TrackSectionAnalysis
-import msong.section.{SectionSimilarity, FullSection, Section}
+import msong.section.{SectionSimilarity, FullSection}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -10,19 +9,22 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
 /**
+  * Spark Job to process Track Sections and find their similarities.
+  * Relies on TrackSetionAnalysis heavily
+  *
   * Created by jcdvorchak on 7/5/2016.
   */
-object TrackSectionAnalysis {
+object TrackSectionSparkJob {
 
   def main(args: Array[String]): Unit = {
     if (args.length != 2) {
-      println("Usage: spark.TrackSectionAnalysis <inputPath> <outputPath>")
+      println("Usage: spark.TrackSectionSparkJob <inputPath> <outputPath>")
       System.exit(1)
     }
     val inputPath = args(0)
     val outputPath = args(1)
 
-    val sparkConf = new SparkConf().setAppName("FullTrack Section Analysis")
+    val sparkConf = new SparkConf().setAppName("Track Section Analysis")
     val sc = new SparkContext(sparkConf)
 
     val inputData = sc.binaryFiles(inputPath)
@@ -61,25 +63,8 @@ object TrackSectionAnalysis {
       secSimList
     }
 
-    val matches = similarities.filter(line => line != null)
+    val matches = similarities.filter(line => line != null || line == "")
 
     matches.saveAsTextFile(outputPath)
-
-    // make tracksectionanalysis static broh
-    // make section hold more (have a thin section and a thick section) -- basically not the huge arrays
-    // make a thin track object too for later -- basically not the huge arrays
-    // FLATMAP A TRACK TO KEYVAL(ARTIST/TRACK),SECTION
-    // need a func to go from track to sectinos
-    // REDUCE BY KEY WHERE A,B ARE SECTIONS OF A TRACK, KEYVAL WOULD BE ARTIST TRACK
-    // need a func to compare two sections
-    // can skip func if they are way dif lengths, or next to each other, w/e
-
-    // SHOULD END UP WITH AN OBJ LIKE KEY--ARTIST/TRACK--VAL LIST OF TRACK SecSim objects
-
-    //    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
-    //    import sqlContext.implicits._
-
   }
-
-
 }

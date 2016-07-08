@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
+ * Parser for Million Song Dataset HDF5 files using NetCDF
+ * Specific to the fields I required
+ *
  * Created by jcdvorchak on 7/6/2016.
  */
 public class MSongHDF5Parser {

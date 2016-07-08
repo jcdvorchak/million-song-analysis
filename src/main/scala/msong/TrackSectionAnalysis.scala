@@ -2,16 +2,17 @@ package msong
 
 import java.util
 
-import msong.section.{SectionSimilarity, Section, FullSection}
+import msong.section.{SectionSimilarity, FullSection}
 import msong.track.FullTrack
 
 import scala.collection.JavaConversions._
 
 /**
+  * Functions for finding similarities between track sections
+  *
   * Created by jcdvorchak on 7/3/2016.
   */
 object TrackSectionAnalysis {
-
   // used for breaking out loops
   object Break extends Exception {}
 
@@ -20,8 +21,8 @@ object TrackSectionAnalysis {
   /**
     * Convert a FullTrack into an array of FullSections
     *
-    * @param track
-    * @return
+    * @param track FullTrack to convert
+    * @return array of FullSections
     */
   def trackToSections(track: FullTrack): Array[FullSection] = {
     if (!track.isValid) {
@@ -121,10 +122,16 @@ object TrackSectionAnalysis {
     sectionArr
   }
 
+  /**
+    * Convert two sections into a SectionSimilarity object
+    *
+    * @param sectionA FullSection
+    * @param sectionB FullSection
+    * @return SectionSimilarity
+    */
   def sectionsToSimilarity(sectionA: FullSection, sectionB: FullSection): SectionSimilarity = {
     var sectionSimilarity: SectionSimilarity = null
 
-    // only return good comps
     // check if you should even process the comp beforehand (length differences,same section, etc.)
     if (isSimilarLength(sectionA,sectionB,.8) && sectionA!=sectionB ) {
 
@@ -133,13 +140,13 @@ object TrackSectionAnalysis {
       var maxSimTotal = 0.0 // save section with highest total? use as baseline? nah
       var currSimTotal = 0.0
 
-      pitchRawSim = cosineSimilarity(sectionA.getPitchRawArr, sectionB.getPitchRawArr)
-      timbreRawSim = cosineSimilarity(sectionA.getTimbreRawArr, sectionB.getTimbreRawArr)
-      pitchCountSim = cosineSimilarity(sectionA.getPitchCountArr, sectionB.getPitchCountArr)
-      timbreCountSim = cosineSimilarity(sectionA.getTimbreCountArr, sectionB.getTimbreCountArr)
-      loudnessMaxSim = cosineSimilarity(sectionA.getLoudnessMaxArr, sectionB.getLoudnessMaxArr)
-      loudnessMaxTimeSim = cosineSimilarity(sectionA.getLoudnessMaxTimeArr, sectionB.getLoudnessMaxTimeArr)
-      loudnessStartSim = cosineSimilarity(sectionA.getLoudnessStartArr, sectionB.getLoudnessStartArr)
+      pitchRawSim = Helper.cosineSimilarity(sectionA.getPitchRawArr, sectionB.getPitchRawArr)
+      timbreRawSim = Helper.cosineSimilarity(sectionA.getTimbreRawArr, sectionB.getTimbreRawArr)
+      pitchCountSim = Helper.cosineSimilarity(sectionA.getPitchCountArr, sectionB.getPitchCountArr)
+      timbreCountSim = Helper.cosineSimilarity(sectionA.getTimbreCountArr, sectionB.getTimbreCountArr)
+      loudnessMaxSim = Helper.cosineSimilarity(sectionA.getLoudnessMaxArr, sectionB.getLoudnessMaxArr)
+      loudnessMaxTimeSim = Helper.cosineSimilarity(sectionA.getLoudnessMaxTimeArr, sectionB.getLoudnessMaxTimeArr)
+      loudnessStartSim = Helper.cosineSimilarity(sectionA.getLoudnessStartArr, sectionB.getLoudnessStartArr)
 
       currSimTotal = pitchRawSim + timbreRawSim + pitchCountSim + timbreCountSim + loudnessMaxSim + loudnessMaxTimeSim + loudnessStartSim
       if (currSimTotal > maxSimTotal) {
@@ -156,10 +163,13 @@ object TrackSectionAnalysis {
     sectionSimilarity
   }
 
-  /*
-   * Find which segment starts a section
-   * First one will skip ahead with this algo, its always 0 tho a*b time complex
-   */
+  /**
+    * Find which segment starts a section
+    *
+    * @param sectionsStart Array[Double] of section start times
+    * @param segmentsStart Array[Double] of segment start times
+    * @return Array[Int](sectionsStart.length) of segment indices that starts each section
+    */
   private def getSectionSegmentStartIndex(sectionsStart: Array[Double], segmentsStart: Array[Double]): Array[Int] = {
     val sectionSegmentStart = new Array[Int](sectionsStart.length)
 
@@ -185,9 +195,14 @@ object TrackSectionAnalysis {
     sectionSegmentStart
   }
 
-  /*
-   * Check if the length of secA and secB are within a certain threshold of each other
-   */
+  /**
+    * Check if the length of secA and secB are within a certain threshold of each other
+    *
+    * @param sectionA FullSection
+    * @param sectionB FullSection
+    * @param threshold how far is similar?
+    * @return true if they are within the threshold
+    */
   def isSimilarLength(sectionA: FullSection, sectionB: FullSection, threshold: Double): Boolean = {
     var long = 0.0
     var short = 0.0
@@ -202,6 +217,13 @@ object TrackSectionAnalysis {
     short >= long * threshold
   }
 
+  /**
+    * Defines what determines a successful SectionSimilarity
+    *
+    * @param secSim SectionSimilarity
+    * @param maxTot highest combination of all sim values
+    * @return true if approved match
+    */
   def isMatch(secSim: SectionSimilarity, maxTot: Double): Boolean = {
     //    val maxDistance = 99.0 / 100.0
     //    secSim.getTotalSim >= maxTot * maxDistance &&
@@ -210,55 +232,8 @@ object TrackSectionAnalysis {
       secSim.getPitchCountSim > .99 &&
       secSim.getTimbreCountSim > .99 &&
       secSim.getLoudnessMaxSim + secSim.getLoudnessMaxTimeSim + secSim.getLoudnessStartSim > 2.42 &&
-//      secSim.isSimilarLength(0.8) &&
       (secSim.getSecA.getEndTime != secSim.getSecB.getStartTime) &&
       (secSim.getSecA.getStartTime != secSim.getSecB.getEndTime)
-
-    //        currSim.isSectionConfident(0.5))
-    //    var newTot = secSim.getPitchRawSim
-    //    newTot += secSim.getPitchCountSim
-    //    newTot += secSim.getTimbreRawSim
-    //    newTot += secSim.getTimbreCountSim
-    //    newTot += secSim.getLoudnessMaxSim*.5
-    //    newTot += secSim.getLoudnessMaxTimeSim*.5
-    //    newTot += secSim.getLoudnessStartSim*.5
-  }
-
-  def cosineSimilarity(vectorA: Array[Double], vectorB: Array[Double]): Double = {
-    var dotProduct = 0.0
-    var normA = 0.0
-    var normB = 0.0
-
-    var indices = vectorA.indices
-    if (vectorA.length > vectorB.length) {
-      indices = vectorB.indices
-    }
-
-    for (i <- indices) {
-      dotProduct += vectorA(i) * vectorB(i)
-      normA += Math.pow(vectorA(i), 2)
-      normB += Math.pow(vectorB(i), 2)
-    }
-
-    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB))
-  }
-
-  def cosineSimilarity(vectorA: Array[Int], vectorB: Array[Int]): Double = {
-    var dotProduct = 0.0
-    var normA = 0.0
-    var normB = 0.0
-
-    var indices = vectorA.indices
-    if (vectorA.length > vectorB.length) {
-      indices = vectorB.indices
-    }
-    for (i <- indices) {
-      dotProduct += vectorA(i) * vectorB(i)
-      normA += Math.pow(vectorA(i), 2)
-      normB += Math.pow(vectorB(i), 2)
-    }
-
-    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB))
   }
 
 }

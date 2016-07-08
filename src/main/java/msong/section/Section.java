@@ -5,6 +5,8 @@ import msong.track.Track;
 import java.io.Serializable;
 
 /**
+ * Container for section data
+ *
  * Created by dvorcjc on 7/7/2016.
  */
 public class Section implements Serializable {

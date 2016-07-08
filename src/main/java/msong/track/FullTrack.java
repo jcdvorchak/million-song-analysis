@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 /**
  * FullTrack object for HDF5 Files
+ * Contains all section and segment data necessary for TrackSectionAnalysis
  *
  * Created by jcdvorchak on 7/6/2016.
  */

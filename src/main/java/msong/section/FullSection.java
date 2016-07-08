@@ -7,6 +7,8 @@ import msong.track.Track;
 import scala.collection.JavaConversions.*;
 
 /**
+ * Contains all section and segment data necessary for TrackSectionAnalysis
+ *
  * Created by dvorcjc on 7/7/2016.
  */
 public class FullSection extends Section {
