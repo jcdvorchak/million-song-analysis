@@ -162,7 +162,7 @@ public class Track implements Serializable {
         return songHotttnesss;
     }
 
-    public void setSongHotttnesss(double songHotttness) {
+    public void setSongHotttnesss(double songHotttnesss) {
         this.songHotttnesss = songHotttnesss;
     }
 
