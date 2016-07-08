@@ -42,4 +42,11 @@ class GeneralAnalysisTest {
 
     result.foreach(println)
   }
+
+  @Test
+  def sectionSimilarityCountHotttnesssTest(): Unit = {
+    val result = GeneralAnalysis.sectionSimilarityCountHotttnesss(lineList.toList)
+
+    result.foreach(println)
+  }
 }
