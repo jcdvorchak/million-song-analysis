@@ -16,3 +16,7 @@ Processed 500k of the Millon Song Dataset using...
 Some photos of a few quick Tableau visualizations are located in the 'docs' directory! They are based on the output of 500,000 tracks processed through msong.LocalRuns.trackAnalysisPsv + msong.LocalRuns.sectionSimilarityCounts.
 
 docs/sampleoutput contains the output of LocalRuns.trackAnalysisPsv and LocalRuns.sectionSimilarityCounts for 10,000 files.
+
+
+**Visualization of Repetition Duration by Genre for 500k tracks**
+![alt tag](https://raw.githubusercontent.com/jcdvorchak/million-song-analysis/master/docs/repitition%20duration%20by%20genre.PNG)
