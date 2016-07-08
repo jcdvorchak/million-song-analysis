@@ -159,17 +159,35 @@ object GeneralAnalysis {
     var duration, hotttnesss: Double = 0.0
     var trackName: String = ""
     var lineArr: Array[String] = null
+    var len = 0
     val keyval = lineList.flatMap { line =>
       result = new ListBuffer[Tuple2[String, String]]
       lineArr = line.split("\\|")
-      duration = (lineArr(9).toDouble + lineArr(11).toDouble) / 2.0
-      hotttnesss = lineArr(4).toDouble
+      len = lineArr.length
+      try {
+//        duration = (lineArr(9).toDouble + lineArr(11).toDouble) / 2.0
+        duration = (lineArr(len-10).toDouble + lineArr(len-8).toDouble) / 2.0
+      } catch {
+        case e: NumberFormatException => {
+          duration = 0.0
+          println("duration NFE")
+        }
+      }
+      try {
+//        hotttnesss = lineArr(4).toDouble
+        hotttnesss = lineArr(len-15).toDouble
+      } catch {
+        case e: NumberFormatException => {
+          hotttnesss = 0.0
+          println("hotttnesss NFE")
+        }
+      }
       trackName = lineArr(1)
 
       for (i <- 0 until 3) {
-        if (lineArr(5 + i) != "") {
+        if (lineArr((len-14) + i) != "") {
           // genre,trackName,avgDurationOfSecSim,hotttnesss
-          result.add((lineArr(5 + i), trackName + "|" + duration + "|" + hotttnesss))
+          result.add((lineArr((len-14) + i), trackName + "|" + duration + "|" + hotttnesss))
         }
       }
 
@@ -207,14 +225,40 @@ object GeneralAnalysis {
     var duration, hotttnesss: Double = 0.0
     var trackName: String = ""
     var lineArr: Array[String] = null
+    var len,year = 0
     val keyval = lineList.map { line =>
       lineArr = line.split("\\|")
-      duration = (lineArr(9).toDouble + lineArr(11).toDouble) / 2.0
-      hotttnesss = lineArr(4).toDouble
+      len = lineArr.length
+      try {
+        //        duration = (lineArr(9).toDouble + lineArr(11).toDouble) / 2.0
+        duration = (lineArr(len-10).toDouble + lineArr(len-8).toDouble) / 2.0
+      } catch {
+        case e: NumberFormatException => {
+          duration = 0.0
+          println("duration NFE")
+        }
+      }
+      try {
+        //        hotttnesss = lineArr(4).toDouble
+        hotttnesss = lineArr(len-15).toDouble
+      } catch {
+        case e: NumberFormatException => {
+          hotttnesss = 0.0
+          println("hotttnesss NFE")
+        }
+      }
       trackName = lineArr(1)
 
       // decade,trackName,avgDurationOfSecSim,hotttnesss
-      (Helper.getDecade(lineArr(2).toInt), trackName + "|" + duration + "|" + hotttnesss)
+      try {
+        year = lineArr(2).toInt
+      } catch {
+        case e: NumberFormatException => {
+          year = 0
+//          println("year NFE")
+        }
+      }
+      (Helper.getDecade(year), trackName + "|" + duration + "|" + hotttnesss)
     }.filter(pair => pair._1 != -1)
 
     val output = keyval.groupBy(pair => pair._1).map { group =>
@@ -248,14 +292,32 @@ object GeneralAnalysis {
     var duration, hotttnesss: Double = 0.0
     var trackName: String = ""
     var lineArr: Array[String] = null
+    var len = 0
     val keyval = lineList.map { line =>
       lineArr = line.split("\\|")
-      duration = (lineArr(9).toDouble + lineArr(11).toDouble) / 2.0
-      hotttnesss = lineArr(4).toDouble
+      len = lineArr.length
+      try {
+        //        duration = (lineArr(9).toDouble + lineArr(11).toDouble) / 2.0
+        duration = (lineArr(len-10).toDouble + lineArr(len-8).toDouble) / 2.0
+      } catch {
+        case e: NumberFormatException => {
+          duration = 0.0
+          println("duration NFE")
+        }
+      }
+      try {
+        //        hotttnesss = lineArr(4).toDouble
+        hotttnesss = lineArr(len-15).toDouble
+      } catch {
+        case e: NumberFormatException => {
+          hotttnesss = 0.0
+          println("hotttnesss NFE")
+        }
+      }
       trackName = lineArr(1)
 
       // Location,trackName,avgDurationOfSecSim,hotttnesss
-      (lineArr(3), trackName + "|" + duration + "|" + hotttnesss)
+      (lineArr(len-16), trackName + "|" + duration + "|" + hotttnesss)
     }.filter(pair => pair._1 != "")
 
     val output = keyval.groupBy(pair => pair._1).map { group =>
