@@ -21,7 +21,7 @@ object LocalRuns {
     val inputPath = args(0) //= "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\data"
     val outputPath = args(1) //= "C:\\Users\\Admin\\Downloads\\MillionSongSubset\\10k_output.txt"
 
-    //    trackAnalysisPsv(inputPath, outputPath)
+//    trackAnalysisPsv(inputPath, outputPath)
 
     sectionSimilarityCounts(inputPath, outputPath)
   }
@@ -90,12 +90,14 @@ object LocalRuns {
     val genreOutputFilePath = outputDirectory.getAbsolutePath + "/genreCounts.txt"
     val decadeOutputFilePath = outputDirectory.getAbsolutePath + "/decadeCounts.txt"
     val locationOutputFilePath = outputDirectory.getAbsolutePath + "/locationCounts.txt"
+    val hotttnesssOutputFilePath = outputDirectory.getAbsolutePath + "/hotttnesssCounts.txt"
 
-    val lineList = Source.fromFile(inputPath).getLines.toList
+    val lineList = Source.fromFile(inputPath, "ISO-8859-1").getLines.toList
 
     Helper.writeToFile(genreOutputFilePath, GeneralAnalysis.sectionSimilarityCountGenre(lineList))
     Helper.writeToFile(decadeOutputFilePath, GeneralAnalysis.sectionSimilarityCountDecade(lineList))
     Helper.writeToFile(locationOutputFilePath, GeneralAnalysis.sectionSimilarityCountLocation(lineList))
+    Helper.writeToFile(hotttnesssOutputFilePath, GeneralAnalysis.sectionSimilarityCountHotttnesss(lineList))
   }
 
 }

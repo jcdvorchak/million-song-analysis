@@ -279,7 +279,7 @@ object GeneralAnalysis {
   }
 
   /**
-    * * Aggregate track section similarities by location
+    * Aggregate track section similarities by location
     *
     * Expects output of LocalRuns.trackAnalysisCsv
     * artistName|trackName| year|artistLocation|songHotttnesss|genre1|genre2|genre3|
@@ -332,6 +332,65 @@ object GeneralAnalysis {
       }
 
       group._1.toString + "|" + simCount + "|" + (durationTotal / simCount) + "|" + (hotttnesssTotal / simCount)
+    }
+
+    output.toArray[String]
+  }
+
+  /**
+    * Aggregate track section similarities by avg hotttness and duration
+    *
+    * Expects output of LocalRuns.trackAnalysisCsv
+    * artistName|trackName| year|artistLocation|songHotttnesss|genre1|genre2|genre3|
+    * sectionATime|sectionALength|sectionBTime|sectionBLength|pitchSim|timbreSim|
+    * pitchCountSim|timbreCountSim|loudnessMaxSim|loudnessMaxTimeSim|loudnessStartSim
+    */
+  def sectionSimilarityCountHotttnesss(lineList: List[String]): Array[String] = {
+    // duration rounded to 1s,simTotal,avgHotttnesss
+
+    var duration: Int = 0
+      var hotttnesss: Double = 0.0
+    var trackName: String = ""
+    var lineArr: Array[String] = null
+    var len = 0
+    val keyval = lineList.map { line =>
+      lineArr = line.split("\\|")
+      len = lineArr.length
+      try {
+        //        duration = (lineArr(9).toDouble + lineArr(11).toDouble) / 2.0
+        duration = ((lineArr(len-10).toDouble + lineArr(len-8).toDouble)/2.0).toInt
+      } catch {
+        case e: NumberFormatException => {
+          duration = 0
+          println("duration NFE")
+        }
+      }
+      try {
+        //        hotttnesss = lineArr(4).toDouble
+        hotttnesss = lineArr(len-15).toDouble
+      } catch {
+        case e: NumberFormatException => {
+          hotttnesss = 0.0
+          println("hotttnesss NFE")
+        }
+      }
+      trackName = lineArr(1)
+
+      // Location,trackName,avgDurationOfSecSim,hotttnesss
+      (duration, trackName + "|" + hotttnesss)
+    }.filter(pair => pair._1 != "")
+
+    val output = keyval.groupBy(pair => pair._1).map { group =>
+      var hotttnesssTotal: Double = 0.0
+      var simCount: Int = 0
+      var lineArr: Array[String] = null
+      group._2.foreach { line =>
+        lineArr = line._2.split("\\|")
+        simCount += 1
+        hotttnesssTotal += lineArr(1).toDouble
+      }
+
+      group._1.toString + "|" + simCount + "|" + (hotttnesssTotal / simCount)
     }
 
     output.toArray[String]
